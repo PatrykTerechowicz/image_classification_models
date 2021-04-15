@@ -98,7 +98,7 @@ def get_optimizer_by_model(model_name, model: torch.nn.Module):
     if model_name == "mobilenetV2":
         optimizer_config = {
             "lr": 0.0045,
-            "weight_decay": 4e-5,
+            "weight_decay": 4*1e-5,
             "momentum": 0.9
         }
         optimizer_class = torch.optim.RMSprop
@@ -136,7 +136,7 @@ def get_optimizer_by_model(model_name, model: torch.nn.Module):
     if model_name in ["shufflenet_v2_x0_5", "shufflenet_v2_x1_0"]:
         optimizer_config = {
             "lr": 0.0045,
-            "weight_decay": 4e-5,
+            "weight_decay": 4*1e-5,
             "momentum": 0.9
         }
         optimizer_class = torch.optim.RMSprop
@@ -164,13 +164,12 @@ def get_optimizer_by_model(model_name, model: torch.nn.Module):
     if model_name == "alexnet":
         optimizer_config = {
             "lr": 0.0045,
-            "weight_decay": 4e-5,
+            "weight_decay": 4*1e-5,
             "momentum": 0.9
         }
         optimizer_class = torch.optim.RMSprop
         trainable_parameters = model.classifier[-1].parameters()
         schedule_fn = lambda epoch: 0.98 ** epoch
-        
     
 
     optimizer = optimizer_class(trainable_parameters, **optimizer_config)
