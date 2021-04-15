@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.optim as optim
 import torchvision
 import model_utils
 
@@ -174,7 +175,7 @@ def get_optimizer_by_model(model_name, model: torch.nn.Module):
 
     optimizer = optimizer_class(trainable_parameters, **optimizer_config)
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=schedule_fn)
-    return optimizer, scheduler
+    return optimizer: optim.Optimizer, scheduler: optim.lr_scheduler.LambdaLR
 
 
 if __name__ == "__main__":
