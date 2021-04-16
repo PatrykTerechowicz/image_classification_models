@@ -15,7 +15,7 @@ from typing import Callable
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--model", default="alexnet", help="Name of model.")
+parser.add_argument("--model_name", default="alexnet", help="Name of model.")
 parser.add_argument("--num_classes", default=1000, type=int, help="On how many classes model has been trained?")
 parser.add_argument("--class_names", default="./classes.txt", help="txt file containing name classes, used for ensuring that labels aren't mismatched.")
 parser.add_argument("--path", default="./best.pth", help="Relative or absolute path to model.")
