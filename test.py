@@ -12,6 +12,7 @@ import plot_utils
 import torchvision
 from torch.utils.tensorboard import SummaryWriter
 from typing import Callable
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
 
@@ -27,14 +28,11 @@ parser.add_argument("--test_name", default="test", type=str, help="Name the test
 parser.add_argument("--batch_size", default=64, type=int)
 parser.add_argument("--num_workers", default=2, type=int)
 parser.add_argument("--cuda", action="store_true", help="Option for enabling testing using cuda.")
-parser.add_argument("--notebook", action="store_true", help="Use this if you want to run this script on jupyter notebooks.")
 
 args = parser.parse_args()
 
 assert not args.save_fig, "save_fig currently unsuported" # TODO: add support
 
-if args.notebook: from tqdm.notebook import tqdm
-else: from tqdm import tqdm
 
 
 def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: SummaryWriter, total_batches, data_len, loss_fn: Callable=F.cross_entropy, save_fig=False, cuda=True):
