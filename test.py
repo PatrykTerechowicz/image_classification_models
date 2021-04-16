@@ -86,7 +86,7 @@ if __name__ == "__main__":
     logdir = f"{args.log_dir}/{args.test_name}"
     summary_writer = SummaryWriter(logdir)
     
-    summary_writer.add_graph(model, dataset[0].unsqueeze(0))
+    summary_writer.add_graph(model, dataset[0][0].unsqueeze(0))
     
     accuracy, topk_accuracy, loss = test(model, data_loader, summary_writer, math.ceil(len(dataset)/args.batch_size), len(dataset))
     summary_writer.add_text("test", f"{args.model_name} has achieved:\n->accuracy: {accuracy:.2%}\n->TopK: {topk_accuracy:.2%}\n->Mean Loss: {loss:.6f}")
