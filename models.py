@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import model_utils
+from typing import Tuple
 
 # not supported: shufflenet_v2_x1_5; shufflenet_v2_x2_0; mnasnet0_75
 model_names = ["mobilenetV2", "mobilenetV3_small", "mobilenetV3_large", "densenet121", "densenet161", "densenet169", "densenet201", 
@@ -89,7 +90,7 @@ def create_model_by_name(model_name, out_classes):
     return model
 
 
-def get_optimizer_by_model(model_name, model: torch.nn.Module):
+def get_optimizer_by_model(model_name, model: torch.nn.Module) -> Tuple[optim.Optimizer, optim.lr_scheduler.LambdaLR]:
     assert model_name in model_names, f"script doesn't support {model_name}"
     optimizer = None
     optimizer_config = None
@@ -175,7 +176,7 @@ def get_optimizer_by_model(model_name, model: torch.nn.Module):
 
     optimizer = optimizer_class(trainable_parameters, **optimizer_config)
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=schedule_fn)
-    return optimizer: optim.Optimizer, scheduler: optim.lr_scheduler.LambdaLR
+    return optimizer, scheduler
 
 
 if __name__ == "__main__":
