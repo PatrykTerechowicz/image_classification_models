@@ -53,6 +53,9 @@ def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: Summary
     total_loss = 0
     for batch_idx, batch in tqdm(enumerate(test_loader), total=total_batches):
         sample, target = batch
+        if args.cuda:
+            sample = sample.cuda()
+            target = target.cuda()
         net_out = model(sample)
         correct_predictions += metrics.accuracy(target, net_out)
         loss = loss_fn(net_out, target)
