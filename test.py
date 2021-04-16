@@ -37,7 +37,7 @@ if args.notebook: from tqdm.notebook import tqdm
 else: from tqdm import tqdm
 
 
-def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: SummaryWriter, total_batches, data_len, loss_fn: Callable=F.cross_entropy, save_fig=False):
+def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: SummaryWriter, total_batches, data_len, loss_fn: Callable=F.cross_entropy, save_fig=False, cuda=True):
     """Tests models and returns accuracy, top-k accuracy and crosscategorical_loss.
 
     Args:
@@ -47,13 +47,12 @@ def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: Summary
     Returns:
         [type]: [description]
     """
-    assert utils.get_model_device(model) == utils.get_dataloader_device(test_loader), "model and dataloader is located in different devices, for dataloader set pin_memory=True/False, for model use model.cuda() or model.cpu()"
     correct_predictions = 0
     correct_topk_predictions = 0
     total_loss = 0
     for batch_idx, batch in tqdm(enumerate(test_loader), total=total_batches):
         sample, target = batch
-        if args.cuda:
+        if cuda:
             sample = sample.cuda()
             target = target.cuda()
         net_out = model(sample)
@@ -93,7 +92,7 @@ if __name__ == "__main__":
     if args.cuda: sample1 = sample1.cuda()
     summary_writer.add_graph(model, sample1)
     
-    accuracy, topk_accuracy, loss = test(model, data_loader, summary_writer, math.ceil(len(dataset)/args.batch_size), len(dataset))
+    accuracy, topk_accuracy, loss = test(model, data_loader, summary_writer, math.ceil(len(dataset)/args.batch_size), len(dataset), save_fig=args.save_fig, cuda=args.cuda)
     summary_writer.add_text("test", f"{args.model_name} has achieved:\n->accuracy: {accuracy:.2%}\n->TopK: {topk_accuracy:.2%}\n->Mean Loss: {loss:.6f}")
     print(f"End of testing. Saved logs in {logdir}.")
     summary_writer.close()
