@@ -59,7 +59,7 @@ def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: Summary
         correct_predictions += metrics.accuracy(target, net_out)
         correct_topk_predictions += metrics.topk_accuracy(target, net_out)
         loss = loss_fn(net_out, target)
-        summary_writer.add_scalars("test", {"loss": loss})
+        summary_writer.add_scalars("test", {"loss": loss}, batch_idx)
         total_loss += torch.sum(loss)
         if args.save_fig:
             figs = None
