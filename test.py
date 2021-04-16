@@ -57,6 +57,7 @@ def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: Summary
             target = target.cuda()
         net_out = model(sample)
         correct_predictions += metrics.accuracy(target, net_out)
+        correct_topk_predictions += metrics.topk_accuracy(target, net_out)
         loss = loss_fn(net_out, target)
         summary_writer.add_scalars("test", {"loss": loss})
         total_loss += torch.sum(loss)
@@ -64,6 +65,8 @@ def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: Summary
             figs = None
             summary_writer.add_figure("predictions", figs)
     
+    accuracy = correct_predictions/data_len
+    topk_accuracy = correct_topk_predictions/data_len
     return accuracy, topk_accuracy, loss/data_len
 
 if __name__ == "__main__":
