@@ -17,7 +17,7 @@ def parameters(model):
     return sum(p.numel() for p in model.parameters())
 
 
-def create_model_by_name(model_name, out_classes):
+def create_model_by_name(model_name, out_classes) -> nn.Module:
     assert model_name in model_names, f"script doesn't support {model_name}"
     model = None
     if model_name == "mobilenetV2":
