@@ -1,5 +1,5 @@
 import torch.nn as nn
-import torch.data as data
+import torch.utils.data as data
 import torch
 from torchvision.transforms import Compose, ToTensor, Resize, Normalize
 
