@@ -66,7 +66,7 @@ def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: Summary
 
 if __name__ == "__main__":
     print(f"Loading {args.model_name}")
-    model = models.create_model_by_name(args.model_name, args.total_classes)
+    model = models.create_model_by_name(args.model_name, args.num_classes)
     if args.cuda: model.cuda()
     optimizer, scheduler = models.get_optimizer_by_model(args.model_name, model)
     print(f"{args.model_name} has {models.parameters(model)} parameters")
