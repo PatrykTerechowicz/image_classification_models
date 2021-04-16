@@ -85,3 +85,4 @@ if __name__ == "__main__":
     accuracy, topk_accuracy, loss = test(model, data_loader, summary_writer, math.ceil(len(dataset)/args.batch_size), len(dataset))
     summary_writer.add_text("test", f"{args.model_name} has achieved:\n->accuracy: {accuracy:.2%}\n->TopK: {topk_accuracy:.2%}\n->Mean Loss: {loss:.6f}")
     print(f"End of testing. Saved logs in {logdir}.")
+    summary_writer.close()
