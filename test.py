@@ -65,17 +65,20 @@ def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: Summary
     return accuracy, topk_accuracy, loss/data_len
 
 if __name__ == "__main__":
-    print(f"Loading {args.model_name}")
+    print(f"Defining structure of {args.model_name}")
     model = models.create_model_by_name(args.model_name, args.num_classes)
     if args.cuda: model.cuda()
     optimizer, scheduler = models.get_optimizer_by_model(args.model_name, model)
     print(f"{args.model_name} has {models.parameters(model)} parameters")
+    print(f"Loading weights of {args.model_name} from {args.path}")
+    saved_state_dict = torch.load(args.path)["model"]
+    model.load_state_dict(saved_state_dict)
 
     dataset = torchvision.datasets.ImageFolder(args.ds_path, transform=utils.get_transform(args.target_size))
     class_names = []
     with open(args.class_names) as file:
         class_names = [l.strip("\n\r") for l in file.readlines()]
-    assert class_names == dataset.class_names, f"Class names dont match!" # TODO: print first not equal elements
+    assert class_names == dataset.classes, f"Class names dont match!" # TODO: print first not equal elements
     
     data_loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, num_workers=args.num_workers, pin_memory=args.cuda)
     # loading ended
