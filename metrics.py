@@ -17,6 +17,6 @@ def topk_accuracy(target, net_out, k: int=3):
     y_pred = torch.argsort(net_out, dim=1)
     correct_preds = 0
     for y, prediction in zip(target, y_pred):
-        if y in prediction[:k]
+        if y in prediction[:k]:
             correct_preds += 1
     return correct_preds
