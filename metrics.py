@@ -14,7 +14,7 @@ def topk_accuracy(target, net_out, k: int=3):
     '''
     assert len(target) == net_out.shape[0], f"Given {len(target)} target classes and {net_out.shape[0]} predictions."
     assert k > 0, f"Provided incorrect k={k}, need to suffice that k>0."
-    y_pred = torch.argsort(net_out, dim=1)
+    y_pred = torch.argsort(net_out, dim=1, descending=True)
     correct_preds = 0
     for y, prediction in zip(target, y_pred):
         if y in prediction[:k]:
