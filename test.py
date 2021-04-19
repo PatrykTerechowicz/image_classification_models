@@ -65,7 +65,7 @@ def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: Summary
     
     accuracy = correct_predictions/data_len
     topk_accuracy = correct_topk_predictions/data_len
-    return accuracy, topk_accuracy, loss/data_len
+    return accuracy, topk_accuracy, total_loss/data_len
 
 if __name__ == "__main__":
     print(f"Defining structure of {args.model_name}")
