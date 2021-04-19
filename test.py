@@ -51,8 +51,7 @@ def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: Summary
     for batch_idx, batch in tqdm(enumerate(test_loader), total=total_batches):
         sample, target = batch
         if cuda:
-            sample = sample.cuda()
-            target = target.cuda()
+            sample, target = utils.copy_batch_to_cuda(batch)
         net_out = model(sample)
         correct_predictions += metrics.accuracy(target, net_out)
         correct_topk_predictions += metrics.topk_accuracy(target, net_out)
