@@ -18,7 +18,7 @@ def parameters(model):
 
 
 def create_model_by_name(model_name, out_classes) -> nn.Module:
-    assert model_name in model_names, f"script doesn't support {model_name}"
+    assert model_name in model_names, f"script doesn't support {model_name}, supported scripts: {model_names}"
     model = None
     if model_name == "mobilenetV2":
         model = torchvision.models.mobilenet_v2(pretrained=True)
