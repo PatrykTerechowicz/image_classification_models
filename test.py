@@ -10,6 +10,8 @@ import models
 import math
 import plot_utils 
 import torchvision
+import matplotlib.pyplot as plt
+import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 from typing import Callable
 from tqdm import tqdm
@@ -35,7 +37,9 @@ assert not args.save_fig, "save_fig currently unsuported" # TODO: add support
 
 
 
-def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: SummaryWriter, total_batches, data_len, loss_fn: Callable=F.cross_entropy, save_fig=False, cuda=True):
+
+
+def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: SummaryWriter, total_batches, data_len, class_names, loss_fn: Callable=F.cross_entropy, save_fig=False, cuda=True):
     """Tests models and returns accuracy, top-k accuracy and crosscategorical_loss.
 
     Args:
@@ -59,8 +63,17 @@ def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: Summary
         summary_writer.add_scalars("test", {"loss": loss}, batch_idx)
         total_loss += torch.sum(loss)
         if args.save_fig:
-            figs = None
-            summary_writer.add_figure("predictions", figs)
+            predictions_probabilities = F.softmax(net_out, dim=1)
+            top_preds, top_preds_args = torch.sort(predictions_probabilities, dim=1, descending=True)
+            for n in range(len(target)):
+                fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 8), tight_layout=True)
+                im_transposed = np.transpose(sample[n].detach().cpu().numpy(), [1, 2, 0])
+                ax1.imshow(im_transposed)
+                top_labels = [class_names[top_preds_args[n, i]] for i in range(10)]
+                ax2.barh(top_preds[n, :10], tick_label=top_labels)
+                plt.title(f"True Label: {class_names[target[n].item()]}")
+                summary_writer.add_figure("predictions", fig, global_step=(batch_idx*len(target)+n))
+                plt.close(fig) # Removes fig from memory
     
     accuracy = correct_predictions/data_len
     topk_accuracy = correct_topk_predictions/data_len
@@ -92,7 +105,7 @@ if __name__ == "__main__":
     if args.cuda: sample1 = sample1.cuda()
     summary_writer.add_graph(model, sample1)
     
-    accuracy, topk_accuracy, loss = test(model, data_loader, summary_writer, math.ceil(len(dataset)/args.batch_size), len(dataset), save_fig=args.save_fig, cuda=args.cuda)
+    accuracy, topk_accuracy, loss = test(model, data_loader, summary_writer, math.ceil(len(dataset)/args.batch_size), len(dataset), args,class_names, save_fig=args.save_fig, cuda=args.cuda)
     summary_writer.add_text("test", f"{args.model_name} has achieved:\n->accuracy: {accuracy:.2%}\n->TopK: {topk_accuracy:.2%}\n->Mean Loss: {loss:.6f}")
     print(f"End of testing. Saved logs in {logdir}.")
     summary_writer.close()

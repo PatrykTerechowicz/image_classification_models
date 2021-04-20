@@ -34,3 +34,4 @@ def get_dataloader_device(dataloader: data.DataLoader):
     for batch_idx, batch in enumerate(dataloader):
         sample, target = batch
         return sample[0].device
+    
