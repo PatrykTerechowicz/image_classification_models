@@ -103,7 +103,7 @@ if __name__ == "__main__":
     if args.cuda: sample1 = sample1.cuda()
     summary_writer.add_graph(model, sample1)
     
-    accuracy, topk_accuracy, loss = test(model, data_loader, summary_writer, math.ceil(len(dataset)/args.batch_size), len(dataset), args,class_names, save_fig=args.save_fig, cuda=args.cuda)
+    accuracy, topk_accuracy, loss = test(model, data_loader, summary_writer, math.ceil(len(dataset)/args.batch_size), len(dataset), args.class_names, save_fig=args.save_fig, cuda=args.cuda)
     summary_writer.add_text("test", f"{args.model_name} has achieved:\n->accuracy: {accuracy:.2%}\n->TopK: {topk_accuracy:.2%}\n->Mean Loss: {loss:.6f}")
     print(f"End of testing. Saved logs in {logdir}.")
     summary_writer.close()
