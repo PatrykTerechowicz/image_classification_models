@@ -33,8 +33,6 @@ parser.add_argument("--cuda", action="store_true", help="Option for enabling tes
 
 args = parser.parse_args()
 
-assert not args.save_fig, "save_fig currently unsuported" # TODO: add support
-
 
 
 
