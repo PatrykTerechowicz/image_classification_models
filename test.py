@@ -24,7 +24,7 @@ parser.add_argument("--class_names", default="./classes.txt", help="txt file con
 parser.add_argument("--path", default="./best.pth", help="Relative or absolute path to model.")
 parser.add_argument("--ds_path", default="./DS/test", help="Relative or absolute path to dataset.")
 parser.add_argument("--target_size", default=224, type=int, help="How big should images be for testing? Should be at least 224.")
-parser.add_argument("--save_fig", default=False, type=bool, help="Should figures be saved?")
+parser.add_argument("--save_fig", action="store_true", help="Should figures be saved?")
 parser.add_argument("--log_dir", default="./logs", type=str)
 parser.add_argument("--test_name", default="test", type=str, help="Name the test so its distinguishable from rest.")
 parser.add_argument("--batch_size", default=64, type=int)
