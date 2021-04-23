@@ -90,7 +90,7 @@ def create_model_by_name(model_name, out_classes) -> nn.Module:
     return model
 
 
-def get_optimizer_by_model(model_name, model: torch.nn.Module) -> Tuple[optim.Optimizer, optim.lr_scheduler.LambdaLR]:
+def get_optimizer_by_model(model_name, model: torch.nn.Module, all_parameters=False) -> Tuple[optim.Optimizer, optim.lr_scheduler.LambdaLR]:
     assert model_name in model_names, f"script doesn't support {model_name}"
     optimizer = None
     optimizer_config = None
@@ -172,7 +172,8 @@ def get_optimizer_by_model(model_name, model: torch.nn.Module) -> Tuple[optim.Op
         optimizer_class = torch.optim.RMSprop
         trainable_parameters = model.classifier[-1].parameters()
         schedule_fn = lambda epoch: 0.98 ** epoch
-    
+
+    if all_parameters: trainable_parameters = model.parameters()
 
     optimizer = optimizer_class(trainable_parameters, **optimizer_config)
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=schedule_fn)

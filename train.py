@@ -18,6 +18,7 @@ def validate(model: nn.Module, valid_loader: data.DataLoader, total_batches: int
     valid_entropy_history = []
     correct_preds = 0
     correct_topk = 0
+    model.eval()
     for batch_idx, batch in tqdm(enumerate(valid_loader), total=total_batches, desc="Validating"):
         sample, target = batch
         if cuda: sample, target = utils.copy_batch_to_cuda(batch)
@@ -33,6 +34,7 @@ def validate(model: nn.Module, valid_loader: data.DataLoader, total_batches: int
 def train_one_epoch(model: nn.Module, optimizer: optim.Optimizer, scheduler: optim.lr_scheduler.LambdaLR, train_loader: data.DataLoader, total_batches: int, train_samples: int, loss_fn: Callable=nn.CrossEntropyLoss(reduction="mean"),cuda=False):
     entropy_history = []
     correct = 0
+    model.train()
     for batch_idx, batch in tqdm(enumerate(train_loader), total=total_batches, desc="Training"):
         optimizer.zero_grad()
         sample, target = batch
@@ -87,7 +89,7 @@ if __name__ == "__main__":
 
     print(f"Loading structure of {args.net}")
     model = models.create_model_by_name(args.net, args.num_classes)
-    optimizer, scheduler = models.get_optimizer_by_model(args.net, model)
+    optimizer, scheduler = models.get_optimizer_by_model(args.net, model, args.all_parameters)
     if args.continue_training:
         print(f"Loading weights from {args.model_path}")
         save = torch.load(args.model_path)
