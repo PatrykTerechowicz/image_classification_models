@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     print(f"Loading structure of {args.net}")
     model = models.create_model_by_name(args.net, args.num_classes)
-    optimizer, scheduler = models.get_optimizer_by_model(args.net, model, args.all_parameters)
+    optimizer, scheduler = models.get_optimizer_by_model(args.net, model, all_parameters=args.all_parameters)
     if args.continue_training:
         print(f"Loading weights from {args.model_path}")
         save = torch.load(args.model_path)
