@@ -19,14 +19,15 @@ def validate(model: nn.Module, valid_loader: data.DataLoader, total_batches: int
     correct_preds = 0
     correct_topk = 0
     model.eval()
-    for batch_idx, batch in tqdm(enumerate(valid_loader), total=total_batches, desc="Validating"):
-        sample, target = batch
-        if cuda: sample, target = utils.copy_batch_to_cuda(batch)
-        net_out = model(sample)
-        loss = loss_fn(net_out, target)
-        valid_entropy_history.append(loss.item())
-        correct_preds += metrics.accuracy(target, net_out)
-        correct_topk += metrics.topk_accuracy(target, net_out)
+    with torch.no_grad():
+        for batch_idx, batch in tqdm(enumerate(valid_loader), total=total_batches, desc="Validating"):
+            sample, target = batch
+            if cuda: sample, target = utils.copy_batch_to_cuda(batch)
+            net_out = model(sample)
+            loss = loss_fn(net_out, target)
+            valid_entropy_history.append(loss.item())
+            correct_preds += metrics.accuracy(target, net_out)
+            correct_topk += metrics.topk_accuracy(target, net_out)
     
     return valid_entropy_history, correct_preds/total_samples, correct_topk/total_samples
 
