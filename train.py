@@ -56,6 +56,7 @@ def train(model: nn.Module, optimizer: optim.Optimizer, scheduler: optim.lr_sche
     train_loader: data.DataLoader, valid_loader: data.DataLoader, summary_writer: SummaryWriter,
     train_batches: int, train_samples: int, valid_batches: int, valid_samples: int, epochs: int, cuda=False):
     for epoch in range(epochs):
+        print(f"Starting epoch {epoch+1}")
         entropy_history, train_accuracy = train_one_epoch(model, optimizer, scheduler, train_loader, train_batches, train_samples, cuda=cuda)
         save_entropy(summary_writer, entropy_history, "train_entropy", epoch=epoch, total_batches=train_batches)
         summary_writer.add_scalar("train_accuracy", train_accuracy, global_step=epoch)
