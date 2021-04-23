@@ -22,7 +22,7 @@ def create_model_by_name(model_name, out_classes) -> nn.Module:
     model = None
     if model_name == "mobilenetV2":
         model = torchvision.models.mobilenet_v2(pretrained=True)
-        model.classifier = nn.Sequential(nn.Dropout(0.2), nn.Linear(model.last_channel, out_classes))
+        model.classifier = nn.Sequential(nn.Dropout(0.2), nn.Linear(model.last_channel, out_classes, bias=True))
     elif model_name == "mobilenetV3_small":
         model = torchvision.models.mobilenet_v3_small(pretrained=True)
         classifier = model.classifier
