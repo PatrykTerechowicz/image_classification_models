@@ -1,0 +1,1 @@
+Contains CLI programs: test.py, train.py, benchmark.py. Other *.py's are helpers.

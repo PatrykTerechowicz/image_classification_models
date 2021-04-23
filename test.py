@@ -60,21 +60,22 @@ def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: Summary
         loss = loss_fn(net_out, target)
         summary_writer.add_scalars("test", {"loss": loss}, batch_idx)
         total_loss += torch.sum(loss)
-        if args.save_fig:
-            predictions_probabilities = F.softmax(net_out, dim=1)
-            top_preds, top_preds_args = torch.sort(predictions_probabilities, dim=1, descending=True)
-            for n in range(len(target)):
-                fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 8), tight_layout=True)
-                im_transposed = np.transpose(sample[n].detach().cpu().numpy(), [1, 2, 0])
-                imax = np.max(im_transposed, dim=2)
-                imin = np.min(im_transposed, dim=2)
-                im_normalized = im_transposed/(imax-imin)-imin
-                ax1.imshow(im_normalized)
-                top_labels = [class_names[top_preds_args[n, i]] for i in range(10)]
-                ax2.barh(top_preds[n, :10], width=0.03, tick_label=top_labels)
-                plt.title(f"True Label: {class_names[target[n].item()]}")
-                summary_writer.add_figure("predictions", fig, global_step=(batch_idx*len(target)+n))
-                plt.close(fig) # Removes fig from memory
+        if args.save_fig and False:
+            pass
+            # predictions_probabilities = F.softmax(net_out, dim=1)
+            # top_preds, top_preds_args = torch.sort(predictions_probabilities, dim=1, descending=True)
+            # for n in range(len(target)):
+            #     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 8), tight_layout=True)
+            #     im_transposed = np.transpose(sample[n].detach().cpu().numpy(), [1, 2, 0])
+            #     imax = np.max(im_transposed, dim=2)
+            #     imin = np.min(im_transposed, dim=2)
+            #     im_normalized = im_transposed/(imax-imin)-imin
+            #     ax1.imshow(im_normalized)
+            #     top_labels = [class_names[top_preds_args[n, i]] for i in range(10)]
+            #     ax2.barh(top_preds[n, :10], width=0.03, tick_label=top_labels)
+            #     plt.title(f"True Label: {class_names[target[n].item()]}")
+            #     summary_writer.add_figure("predictions", fig, global_step=(batch_idx*len(target)+n))
+            #     plt.close(fig) # Removes fig from memory
     
     accuracy = correct_predictions/data_len
     topk_accuracy = correct_topk_predictions/data_len
