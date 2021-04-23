@@ -59,10 +59,10 @@ def train(model: nn.Module, optimizer: optim.Optimizer, scheduler: optim.lr_sche
         print(f"Starting epoch {epoch+1}")
         entropy_history, train_accuracy = train_one_epoch(model, optimizer, scheduler, train_loader, train_batches, train_samples, cuda=cuda)
         save_entropy(summary_writer, entropy_history, "train_entropy", epoch=epoch, total_batches=train_batches)
-        summary_writer.add_scalar("train_accuracy", train_accuracy, global_step=epoch)
+        summary_writer.add_scalar("train_accuracy", train_accuracy*100, global_step=epoch)
         valid_entropy_history, accuracy, topk = validate(model, valid_loader, valid_batches, valid_samples, cuda=cuda)
-        summary_writer.add_scalar("valid_accuracy", accuracy, global_step=epoch)
-        summary_writer.add_scalar("valid_topk", topk, global_step=epoch)
+        summary_writer.add_scalar("valid_accuracy", accuracy*100, global_step=epoch)
+        summary_writer.add_scalar("valid_topk", topk*100, global_step=epoch)
         save_entropy(summary_writer, valid_entropy_history, "valid_entropy", epoch=epoch, total_batches=valid_batches)
 
 
@@ -82,6 +82,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", default=64, type=int, help="batch_size")
     parser.add_argument("--num_workers", default=2, type=int, help="0 for no multiprocessing for data loading")
     parser.add_argument("--cuda", action="store_true")
+    parser.add_argument("--all_parameters", action="store_true", help="if given then whole models weight will be updated")
     args = parser.parse_args()
 
     print(f"Loading structure of {args.net}")
