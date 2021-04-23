@@ -61,12 +61,12 @@ def train(model: nn.Module, optimizer: optim.Optimizer, scheduler: optim.lr_sche
     for epoch in range(epochs):
         print(f"Starting epoch {epoch+1}")
         entropy_history, train_accuracy = train_one_epoch(model, optimizer, scheduler, train_loader, train_batches, train_samples, cuda=cuda)
-        save_entropy(summary_writer, entropy_history, "train_entropy", epoch=epoch, total_batches=train_batches)
-        summary_writer.add_scalar("train_accuracy", train_accuracy*100, global_step=epoch)
+        save_entropy(summary_writer, entropy_history, "train/entropy", epoch=epoch, total_batches=train_batches)
+        summary_writer.add_scalar("train/accuracy", train_accuracy*100, global_step=epoch)
         valid_entropy_history, accuracy, topk = validate(model, valid_loader, valid_batches, valid_samples, cuda=cuda)
-        summary_writer.add_scalar("valid_accuracy", accuracy*100, global_step=epoch)
-        summary_writer.add_scalar("valid_topk", topk*100, global_step=epoch)
-        save_entropy(summary_writer, valid_entropy_history, "valid_entropy", epoch=epoch, total_batches=valid_batches)
+        summary_writer.add_scalar("valid/accuracy", accuracy*100, global_step=epoch)
+        summary_writer.add_scalar("valid/topk", topk*100, global_step=epoch)
+        save_entropy(summary_writer, valid_entropy_history, "valid/entropy", epoch=epoch, total_batches=valid_batches)
 
 
 if __name__ == "__main__":
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     ds_train = ImageFolder(args.train_path, transform=transform)
     ds_valid = ImageFolder(args.valid_path, transform=transform)
     loader_settings = {"batch_size": args.batch_size, "num_workers": args.num_workers}
-    train_loader = data.DataLoader(ds_train, drop_last=True, **loader_settings)
+    train_loader = data.DataLoader(ds_train, drop_last=True, shuffle=True, **loader_settings)
     valid_loader = data.DataLoader(ds_valid, **loader_settings)
 
     train_samples = len(ds_train)
