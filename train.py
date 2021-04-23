@@ -42,9 +42,9 @@ def train_one_epoch(model: nn.Module, optimizer: optim.Optimizer, scheduler: opt
         net_out = model(sample)
         loss = loss_fn(net_out, target)
         entropy_history.append(loss.item())
-        correct += metrics.accuracy(target, net_out)
         loss.backward()
         optimizer.step()
+        correct += metrics.accuracy(target, net_out)
     scheduler.step()
     return entropy_history, correct/train_samples
 
