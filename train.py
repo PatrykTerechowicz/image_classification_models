@@ -23,7 +23,7 @@ def validate(model: nn.Module, valid_loader: data.DataLoader, total_batches: int
         if cuda: sample, target = utils.copy_batch_to_cuda(batch)
         net_out = model(sample)
         loss = loss_fn(net_out, target)
-        valid_entropy_history.append(torch.sum(loss).item())
+        valid_entropy_history.append(torch.mean(loss).item())
         correct_preds += metrics.accuracy(target, net_out)
         correct_topk += metrics.topk_accuracy(target, net_out)
     
@@ -39,7 +39,7 @@ def train_one_epoch(model: nn.Module, optimizer: optim.Optimizer, scheduler: opt
         if cuda: sample, target = utils.copy_batch_to_cuda(batch)
         net_out = model(sample)
         loss = loss_fn(net_out, target)
-        entropy_history.append(torch.sum(loss).item())
+        entropy_history.append(torch.mean(loss).item())
         correct += metrics.accuracy(target, net_out)
         loss.backward()
         optimizer.step()
