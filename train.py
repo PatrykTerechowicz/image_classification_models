@@ -6,36 +6,19 @@ import torch.nn.functional as F
 import models
 import utils
 import metrics
+import math
 from argparse import ArgumentParser
 from torch.utils.tensorboard import SummaryWriter
 from torchvision.datasets import ImageFolder
 from tqdm import tqdm
-
-parser: ArgumentParser = argparse.ArgumentParser(help="Train and test")
-
-parser.add_argument("--train_path", type=str, help="path to training dataset directory")
-parser.add_argument("--valid_path", type=str, help="path to validation dataset directory")
-parser.add_argument("--topk", default=5, type=int, help="When calculating topk metric what k should be?")
-parser.add_argument("--epochs", default=10, type=int, help="how many epochs")
-parser.add_argument("--net", default="alexnet", type=str, help="name of model to train")
-parser.add_argument("--num_classes", default=1000, type=int, help="how many classes your model has to train")
-parser.add_argument("--target_size", default=224, type=int, help="how big images should be for training")
-parser.add_argument("--continue_training", action="store_true", help="use this if you want continue from checkpoint")
-parser.add_argument("--model_path", default="./best.pth", type=str, help="if also continue_training is set to true then will use this model to start")
-parser.add_argument("--log_dir", default="./logs", type=str, help="where to put tensorboard logs")
-parser.add_argument("--log_name", default="train", type=str, help="name of experiment, can be anything")
-parser.add_argument("--batch_size", default=64, type=int, help="batch_size")
-parser.add_argument("--num_workers", default=2, type=int, help="0 for no multiprocessing for data loading")
-parser.add_argument("--cuda", action="store_true")
-
-args = parser.parse_args()
+from typing import Callable
 
 
 def validate(model: nn.Module, valid_loader: data.DataLoader, total_batches: int, total_samples: int, loss_fn: Callable=F.cross_entropy, cuda=False):
     valid_entropy_history = []
     correct_preds = 0
     correct_topk = 0
-    for batch_idx, batch in tqdm(enumerate(valid_loader), total=total_batches):
+    for batch_idx, batch in tqdm(enumerate(valid_loader), total=total_batches, desc="Validating"):
         sample, target = batch
         if cuda: sample, target = utils.copy_batch_to_cuda(batch)
         net_out = model(sample)
@@ -50,7 +33,7 @@ def validate(model: nn.Module, valid_loader: data.DataLoader, total_batches: int
 def train_one_epoch(model: nn.Module, optimizer: optim.Optimizer, scheduler: optim.lr_scheduler.LambdaLR, train_loader: data.DataLoader, total_batches: int, train_samples: int, loss_fn: Callable=F.cross_entropy,cuda=False):
     entropy_history = []
     correct = 0
-    for batch_idx, batch in tqdm(enumerate(train_loader), total=total_batches):
+    for batch_idx, batch in tqdm(enumerate(train_loader), total=total_batches, desc="Training"):
         optimizer.zero_grad()
         sample, target = batch
         if cuda: sample, target = utils.copy_batch_to_cuda(batch)
@@ -83,6 +66,23 @@ def train(model: nn.Module, optimizer: optim.Optimizer, scheduler: optim.lr_sche
 
 
 if __name__ == "__main__":
+    parser: ArgumentParser = ArgumentParser()
+    parser.add_argument("--train_path", type=str, help="path to training dataset directory")
+    parser.add_argument("--valid_path", type=str, help="path to validation dataset directory")
+    parser.add_argument("--topk", default=5, type=int, help="When calculating topk metric what k should be?")
+    parser.add_argument("--epochs", default=10, type=int, help="how many epochs")
+    parser.add_argument("--net", default="alexnet", type=str, help="name of model to train")
+    parser.add_argument("--num_classes", default=1000, type=int, help="how many classes your model has to train")
+    parser.add_argument("--target_size", default=224, type=int, help="how big images should be for training")
+    parser.add_argument("--continue_training", action="store_true", help="use this if you want continue from checkpoint")
+    parser.add_argument("--model_path", default="./best.pth", type=str, help="if also continue_training is set to true then will use this model to start")
+    parser.add_argument("--log_dir", default="./logs", type=str, help="where to put tensorboard logs")
+    parser.add_argument("--log_name", default="train", type=str, help="name of experiment, can be anything")
+    parser.add_argument("--batch_size", default=64, type=int, help="batch_size")
+    parser.add_argument("--num_workers", default=2, type=int, help="0 for no multiprocessing for data loading")
+    parser.add_argument("--cuda", action="store_true")
+    args = parser.parse_args()
+
     print(f"Loading structure of {args.net}")
     model = models.create_model_by_name(args.net, args.num_classes)
     optimizer, scheduler = models.get_optimizer_by_model(args.net, model)
@@ -102,4 +102,9 @@ if __name__ == "__main__":
     train_loader = data.DataLoader(ds_train, drop_last=True, **loader_settings)
     valid_loader = data.DataLoader(ds_valid, **loader_settings)
 
-    train(model, optimizer, scheduler, train_loader, valid_loader, summary_writer)
+    train_samples = len(ds_train)
+    valid_samples = len(ds_valid)
+    train_batches = math.floor(train_samples/args.batch_size)
+    valid_batches = math.ceil(valid_samples/args.batch_size)
+
+    train(model, optimizer, scheduler, train_loader, valid_loader, summary_writer, train_batches, train_samples, valid_batches, valid_samples, args.epochs, cuda=args.cuda)
