@@ -26,7 +26,7 @@ parser.add_argument("--ds_path", default="./DS/test", help="Relative or absolute
 parser.add_argument("--target_size", default=224, type=int, help="How big should images be for testing? Should be at least 224.")
 parser.add_argument("--save_fig", action="store_true", help="Should figures be saved?")
 parser.add_argument("--log_dir", default="./logs", type=str)
-parser.add_argument("--test_name", default="test", type=str, help="Name the test so its distinguishable from rest.")
+parser.add_argument("--test_name", default="test", type=str, help="Name the experiment.")
 parser.add_argument("--batch_size", default=64, type=int)
 parser.add_argument("--num_workers", default=2, type=int)
 parser.add_argument("--cuda", action="store_true", help="Option for enabling testing using cuda.")
