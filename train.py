@@ -113,5 +113,5 @@ if __name__ == "__main__":
     valid_batches = math.ceil(valid_samples/args.batch_size)
 
     train(model, optimizer, scheduler, train_loader, valid_loader, summary_writer, train_batches, train_samples, valid_batches, valid_samples, args.epochs, cuda=args.cuda)
-    state = model.state_dict
+    state = model.state_dict()
     torch.save({"model": state}, f"{args.log_dir}/{args.net}/{args.log_name}/final.pth")
