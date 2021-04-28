@@ -106,7 +106,9 @@ if __name__ == "__main__":
     ds_train = ImageFolder(args.train_path, transform=transform)
     ds_valid = ImageFolder(args.valid_path, transform=transform)
     if args.all_to_ram:
+        print("Loading train dataset to RAM")
         ds_train = DatasetPreloaded(ds_train)
+        print("Loading valid dataset to RAM")
         ds_valid = DatasetPreloaded(ds_valid)
     
     loader_settings = {"batch_size": args.batch_size, "num_workers": args.num_workers}
