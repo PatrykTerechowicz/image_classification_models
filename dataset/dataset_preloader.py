@@ -6,7 +6,7 @@ class DatasetPreloaded(Dataset):
         super().__init__()
         self._data = []
         dataset_iter = dataset
-        if verbose==0: dataset_iter = tqdm.tqdm(dataset, total=len(dataset))
+        if verbose==1: dataset_iter = tqdm.tqdm(dataset, total=len(dataset))
         for data in dataset_iter:
             self._data.append(data)
     
