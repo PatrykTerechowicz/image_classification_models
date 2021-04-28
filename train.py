@@ -7,6 +7,7 @@ import models
 import utils
 import metrics
 import math
+from dataset.dataset_preloader import DatasetPreloaded
 from argparse import ArgumentParser
 from torch.utils.tensorboard import SummaryWriter
 from torchvision.datasets import ImageFolder
@@ -86,6 +87,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_workers", default=2, type=int, help="0 for no multiprocessing for data loading")
     parser.add_argument("--cuda", action="store_true")
     parser.add_argument("--all_parameters", action="store_true", help="if given then whole models weight will be updated")
+    parser.add_argument("--all_to_ram", action="store_true", help="if given then whole datasets will be preloaded on ram")
     args = parser.parse_args()
 
     print(f"Loading structure of {args.net}")
@@ -103,6 +105,10 @@ if __name__ == "__main__":
     transform = utils.get_transform(args.target_size)
     ds_train = ImageFolder(args.train_path, transform=transform)
     ds_valid = ImageFolder(args.valid_path, transform=transform)
+    if args.all_to_ram:
+        ds_train = DatasetPreloaded(ds_train)
+        ds_valid = DatasetPreloaded(ds_valid)
+    
     loader_settings = {"batch_size": args.batch_size, "num_workers": args.num_workers}
     train_loader = data.DataLoader(ds_train, drop_last=True, shuffle=True, **loader_settings)
     valid_loader = data.DataLoader(ds_valid, **loader_settings)
