@@ -1,7 +1,5 @@
 from torch.utils.data import Dataset
 
-
-
 class DatasetPreloaded(Dataset):
     def __init__(self, dataset):
         super().__init__()
