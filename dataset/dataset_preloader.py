@@ -1,10 +1,13 @@
+import tqdm
 from torch.utils.data import Dataset
 
 class DatasetPreloaded(Dataset):
-    def __init__(self, dataset):
+    def __init__(self, dataset, verbose=1):
         super().__init__()
         self._data = []
-        for data in dataset:
+        dataset_iter = dataset
+        if verbose==0: dataset_iter = tqdm.tqdm(dataset, total=len(dataset))
+        for data in dataset_iter:
             self._data.append(data)
     
     def __getitem__(self, index):
