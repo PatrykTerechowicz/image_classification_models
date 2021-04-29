@@ -25,7 +25,7 @@ parser.add_argument("--target_size", default=224, type=int, help="How big should
 parser.add_argument("--save_fig", action="store_true", help="Should figures be saved?")
 parser.add_argument("--log_dir", default="./logs", type=str)
 parser.add_argument("--test_name", default="test", type=str, help="Name the experiment.")
-parser.add_argument("--batch_size", default=64, type=int)
+parser.add_argument("--batch_size", default=16, type=int)
 parser.add_argument("--num_workers", default=2, type=int)
 parser.add_argument("--cuda", action="store_true", help="Option for enabling testing using cuda.")
 
@@ -44,6 +44,7 @@ def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: Summary
     correct_predictions = 0
     correct_topk_predictions = 0
     total_loss = 0
+    step = 0
     for batch_idx, batch in tqdm(enumerate(test_loader), total=total_batches):
         sample, target = batch
         if cuda:
@@ -52,14 +53,14 @@ def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: Summary
         correct_predictions += metrics.accuracy(target, net_out)
         correct_topk_predictions += metrics.topk_accuracy(target, net_out)
         loss = loss_fn(net_out, target)
-        summary_writer.add_scalars("test", {"loss": loss}, batch_idx)
         total_loss += torch.sum(loss)
         if args.save_fig:
             for b, im in enumerate(sample):
+                step += 1
                 fig = plt.figure(figsize=(10, 4))
                 net_out_pred = torch.softmax(net_out[b], dim=0)
-                utils.plot_test_sample(fig, utils.un_normalize(im.detach().cpu()), net_out_pred, class_names, class_names[target[b]])
-                summary_writer.add_figure("figures", fig)
+                utils.plot_test_sample(fig, im.detach().cpu(), net_out_pred.detach().cpu(), class_names, class_names[target[b]])
+                summary_writer.add_figure("figures", fig, global_step=step)
 
 
     
@@ -76,6 +77,7 @@ if __name__ == "__main__":
     print(f"Loading weights of {args.model_name} from {args.path}")
     saved_state_dict = torch.load(args.path)["model"]
     model.load_state_dict(saved_state_dict)
+    model.eval()
 
     dataset = torchvision.datasets.ImageFolder(args.ds_path, transform=utils.get_transform(args.target_size))
     class_names = []
@@ -93,7 +95,7 @@ if __name__ == "__main__":
     if args.cuda: sample1 = sample1.cuda()
     summary_writer.add_graph(model, sample1)
     
-    accuracy, topk_accuracy, loss = test(model, data_loader, summary_writer, math.ceil(len(dataset)/args.batch_size), len(dataset), args.class_names, save_fig=args.save_fig, cuda=args.cuda)
+    accuracy, topk_accuracy, loss = test(model, data_loader, summary_writer, math.ceil(len(dataset)/args.batch_size), len(dataset), class_names, save_fig=args.save_fig, cuda=args.cuda)
     summary_writer.add_text("test", f"{args.model_name} has achieved:\n->accuracy: {accuracy:.2%}\n->TopK: {topk_accuracy:.2%}\n->Mean Loss: {loss:.6f}")
     print(f"End of testing. Saved logs in {logdir}.")
     summary_writer.close()
