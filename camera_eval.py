@@ -34,7 +34,7 @@ def image_to_tensor(image: np.ndarray) -> torch.Tensor:
     im = im.astype(np.float32)/255.0
     return torch.from_numpy(im)
 
-transform = Compose([Resize(448), Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+transform = Compose([Resize(112), ToTensor(),  Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
 
 
 if __name__ == "__main__":
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     with open("class_names.txt") as file:
         class_names = [l.strip("\n\r") for l in file.readlines()]
     #OPENCV
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
 
     while(True):
         # Capture frame-by-frame
