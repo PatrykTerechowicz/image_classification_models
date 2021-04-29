@@ -41,7 +41,8 @@ if __name__ == "__main__":
     # TORCH
     model: nn.Module = models.create_model_by_name("mobilenetV2", out_classes=100)
     save = torch.load("best.pth", map_location=torch.device("cpu"))
-    model.load_state_dict(save["model"]())
+    print(save.keys())
+    model.load_state_dict(save["model"])
     model.eval()
     #CLASS NAMES
     class_names = []
