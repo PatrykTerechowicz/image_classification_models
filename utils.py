@@ -36,11 +36,15 @@ def plot_im(ax: plt.Axes, image: torch.Tensor, true_class: str):
     """
     image = un_normalize(image)
     image_cpu: np.ndarray = image.cpu().detach().numpy()
+    im_max = np.max(image_cpu)
+    im_min = np.min(image_cpu)
+    image_cpu = (image_cpu-im_min)/(im_max-im_min)
     image_cpu = np.transpose(image_cpu, [1, 2, 0])
+    ax.set_title(true_class)
+    ax.annotate(true_class, xy=(112, 112))
     ax.grid(False)
     ax.set_axis_off()
     ax.imshow(image_cpu)
-    ax.set_title(true_class)
 
 
 def plot_test_sample(fig: plt.Figure, image: torch.Tensor, predictions: torch.Tensor, class_names: List[str], true_class: str, k: int=10):
