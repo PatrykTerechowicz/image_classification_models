@@ -8,7 +8,6 @@ import metrics
 import utils
 import models
 import math
-import plot_utils 
 import torchvision
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,7 +16,6 @@ from typing import Callable
 from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
-
 parser.add_argument("--model_name", default="alexnet", help="Name of model.")
 parser.add_argument("--num_classes", default=1000, type=int, help="On how many classes model has been trained?")
 parser.add_argument("--class_names", default="./classes.txt", help="txt file containing name classes, used for ensuring that labels aren't mismatched.")
@@ -32,10 +30,6 @@ parser.add_argument("--num_workers", default=2, type=int)
 parser.add_argument("--cuda", action="store_true", help="Option for enabling testing using cuda.")
 
 args = parser.parse_args()
-
-
-
-
 
 def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: SummaryWriter, total_batches, data_len, class_names, loss_fn: Callable=F.cross_entropy, save_fig=False, cuda=True):
     """Tests models and returns accuracy, top-k accuracy and crosscategorical_loss.
@@ -60,22 +54,14 @@ def test(model: nn.Module, test_loader: data.DataLoader, summary_writer: Summary
         loss = loss_fn(net_out, target)
         summary_writer.add_scalars("test", {"loss": loss}, batch_idx)
         total_loss += torch.sum(loss)
-        if args.save_fig and False:
-            pass
-            # predictions_probabilities = F.softmax(net_out, dim=1)
-            # top_preds, top_preds_args = torch.sort(predictions_probabilities, dim=1, descending=True)
-            # for n in range(len(target)):
-            #     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 8), tight_layout=True)
-            #     im_transposed = np.transpose(sample[n].detach().cpu().numpy(), [1, 2, 0])
-            #     imax = np.max(im_transposed, dim=2)
-            #     imin = np.min(im_transposed, dim=2)
-            #     im_normalized = im_transposed/(imax-imin)-imin
-            #     ax1.imshow(im_normalized)
-            #     top_labels = [class_names[top_preds_args[n, i]] for i in range(10)]
-            #     ax2.barh(top_preds[n, :10], width=0.03, tick_label=top_labels)
-            #     plt.title(f"True Label: {class_names[target[n].item()]}")
-            #     summary_writer.add_figure("predictions", fig, global_step=(batch_idx*len(target)+n))
-            #     plt.close(fig) # Removes fig from memory
+        if args.save_fig:
+            for b, im in enumerate(sample):
+                fig = plt.figure(figsize=(10, 4))
+                net_out_pred = torch.softmax(net_out[b], dim=0)
+                utils.plot_test_sample(fig, utils.un_normalize(im.detach().cpu()), net_out_pred, class_names, class_names[target[b]])
+                summary_writer.add_figure("figures", fig)
+
+
     
     accuracy = correct_predictions/data_len
     topk_accuracy = correct_topk_predictions/data_len
