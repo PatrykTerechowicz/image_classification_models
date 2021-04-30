@@ -34,7 +34,7 @@ def image_to_tensor(image: np.ndarray) -> torch.Tensor:
     im = im.astype(np.float32)/255.0
     return torch.from_numpy(im)
 
-transform = Compose([Resize(112), ToTensor(),  Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+transform = Compose([ToTensor(), Resize(112), Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
 
 
 if __name__ == "__main__":
@@ -54,10 +54,7 @@ if __name__ == "__main__":
     while(True):
         # Capture frame-by-frame
         ret, frame = cap.read()
-
-        tensor_frame: torch.Tensor = image_to_tensor(frame)
-        batch = tensor_frame.unsqueeze(0)
-        outputs = model(transform(batch))
+        outputs = model(transform(np.transpose(frame, [2, 0, 1])).unsqueeze_(0))
         output_probabilities = torch.softmax(outputs, dim=1)
 
         out_frame = put_predictions(frame, output_probabilities[0, :], class_names)
