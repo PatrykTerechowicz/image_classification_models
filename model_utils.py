@@ -1,3 +1,4 @@
+from efficientnet_pytorch.model import EfficientNet
 import torch
 import torch.nn as nn
 from torchvision.models import MNASNet, SqueezeNet, ShuffleNetV2, ResNet, AlexNet

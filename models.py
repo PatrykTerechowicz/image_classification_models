@@ -3,6 +3,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import model_utils
+
+from efficientnet_pytorch import EfficientNet, VALID_MODELS
 from typing import Tuple
 
 # not supported: shufflenet_v2_x1_5; shufflenet_v2_x2_0; mnasnet0_75
@@ -11,6 +13,7 @@ model_names = ["mobilenetV2", "mobilenetV3_small", "mobilenetV3_large", "densene
                 "resnet18", "resnet34", "resnet50", "resnet101", "resnet152", "wide_resnet50_2", "wide_resnet101_2", "mnasnet0_5",
                 "mnasnet1_0", "alexnet"
                 ]
+model_names.extend(VALID_MODELS)
 
 
 def parameters(model):
@@ -87,6 +90,8 @@ def create_model_by_name(model_name, out_classes) -> nn.Module:
     elif model_name == "alexnet":
         model = torchvision.models.alexnet(pretrained=True)
         model_utils.prepare_alexnet(model, out_classes)
+    elif model_name in VALID_MODELS:
+        model = EfficientNet.from_pretrained(model_name, num_classes=out_classes, advprop=False)
     return model
 
 
@@ -172,6 +177,8 @@ def get_optimizer_by_model(model_name, model: torch.nn.Module, all_parameters=Fa
         optimizer_class = torch.optim.RMSprop
         trainable_parameters = model.classifier[-1].parameters()
         schedule_fn = lambda epoch: 0.98 ** epoch
+    if model_name in VALID_MODELS:
+        pass
 
     if all_parameters: trainable_parameters = model.parameters()
 
