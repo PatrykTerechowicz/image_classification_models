@@ -1,8 +1,11 @@
+from augment import CutMix
 import torch
 import torch.optim as optim
 import torch.nn as nn
 import torch.utils.data as data
 import torch.nn.functional as F
+from torchvision.transforms.autoaugment import AutoAugment
+from torchvision.transforms.transforms import Compose
 import models
 import utils
 import metrics
@@ -88,6 +91,8 @@ if __name__ == "__main__":
     parser.add_argument("--cuda", action="store_true")
     parser.add_argument("--all_parameters", action="store_true", help="if given then whole models weight will be updated")
     parser.add_argument("--all_to_ram", action="store_true", help="if given then whole datasets will be preloaded on ram")
+    parser.add_argument("--auto_augment", action="store_true")
+    parser.add_argument("--cut_mix", type=int, default=0, help="probability(in percent ie. 20 for 0.2 probability) of using cut_mix, if 0 or not given then never use cutmix")
     args = parser.parse_args()
 
     print(f"Loading structure of {args.net}")
@@ -103,7 +108,12 @@ if __name__ == "__main__":
     summary_writer = SummaryWriter(f"{args.log_dir}/{args.net}/{args.log_name}")
 
     transform = utils.get_transform(args.target_size)
-    ds_train = ImageFolder(args.train_path, transform=transform)
+    train_transform = transform
+    if args.auto_augment:
+        train_transform = Compose([train_transform, AutoAugment()])
+    if args.cut_mix:
+        train_transform = Compose([train_transform, CutMix(prob=float(args.cut_mix/100))])
+    ds_train = ImageFolder(args.train_path, transform=train_transform)
     ds_valid = ImageFolder(args.valid_path, transform=transform)
     if args.all_to_ram:
         print("Loading train dataset to RAM")
@@ -120,6 +130,7 @@ if __name__ == "__main__":
     train_batches = math.floor(train_samples/args.batch_size)
     valid_batches = math.ceil(valid_samples/args.batch_size)
 
-    train(model, optimizer, scheduler, train_loader, valid_loader, summary_writer, train_batches, train_samples, valid_batches, valid_samples, args.epochs, cuda=args.cuda)
+    train_args = {}
+    train(model, optimizer, scheduler, train_loader, valid_loader, summary_writer, train_batches, train_samples, valid_batches, valid_samples, args.epochs, cuda=args.cuda, **train_args)
     state = model.state_dict()
     torch.save({"model": state}, f"{args.log_dir}/{args.net}/{args.log_name}/final.pth")
