@@ -2,6 +2,9 @@ import tqdm
 from torch.utils.data import Dataset
 
 class DatasetPreloaded(Dataset):
+    """
+        
+    """
     def __init__(self, dataset, verbose=1):
         super().__init__()
         self._data = []
