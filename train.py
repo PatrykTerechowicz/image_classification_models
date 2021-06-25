@@ -69,28 +69,21 @@ if __name__ == "__main__":
     parser.add_argument("-topk", default=5, type=int, help="When calculating topk metric what k should be?")
     parser.add_argument("-epochs", default=10, type=int, help="how many epochs")
     parser.add_argument("-net", default="alexnet", type=str, help="name of model to train")
-    parser.add_argument("-num_classes", default=1000, type=int, help="how many classes your model has to train")
+    parser.add_argument("-num_classes", default=None, type=int, help="how many classes your model has to train")
     parser.add_argument("-target_size", default=224, type=int, help="how big images should be for training")
     parser.add_argument("-model_path", default=None, type=str, help="if given then will load model from this path before start")
     parser.add_argument("-batch_size", default=64, type=int, help="batch_size")
-    parser.add_argument("-num_workers", default=2, type=int, help="0 for no multiprocessing for data loading")
+    parser.add_argument("-num_workers", default=16, type=int, help="0 for no multiprocessing for data loading")
     parser.add_argument("-cuda", action="store_true")
     parser.add_argument("-logistic_regression", action="store_true", help="if given then only train last classifier layer")
     parser.add_argument("-all_to_ram", action="store_true", help="if given then whole datasets will be preloaded on ram")
     parser.add_argument("-auto_augment", action="store_true")
     parser.add_argument("-cut_mix", type=int, default=0, help="probability(in percent ie. 20 for 0.2 probability) of using cut_mix, if 0 or not given then never use cutmix")
     parser.add_argument("-train_on_wrongly", action="store_true", help="If given then will only train on samples that were wrongly classified")
+    parser.add_argument("-smsoftmax", default=0.0, type=float)
     args = parser.parse_args()
     task.update_task({"name": f"Trenowanie {args.net}"})
     print(f"Loading structure of {args.net}")
-    model = models.create_model_by_name(args.net, args.num_classes)
-    optimizer, scheduler = models.get_optimizer_by_model(args.net, model, all_parameters=not args.logistic_regression)
-    if args.model_path:
-        print(f"Loading weights from {args.model_path}")
-        save = torch.load(args.model_path)
-        model.load_state_dict(save['model'])
-    print(f"Cuda is set to {args.cuda}")
-    if args.cuda: model.cuda()
 
     transform = utils.get_transform(args.target_size)
     train_transform = transform
@@ -110,14 +103,25 @@ if __name__ == "__main__":
     loader_settings = {"batch_size": args.batch_size, "num_workers": args.num_workers}
     train_loader = data.DataLoader(ds_train, drop_last=True, shuffle=True, **loader_settings)
     valid_loader = data.DataLoader(ds_valid, **loader_settings)
+    
+    model = models.create_model_by_name(args.net, args.num_classes if args.num_classes else len(ds_train.classes))
+    optimizer, scheduler = models.get_optimizer_by_model(args.net, model, all_parameters=not args.logistic_regression)
+    if args.model_path:
+        print(f"Loading weights from {args.model_path}")
+        save = torch.load(args.model_path)
+        model.load_state_dict(save['model'])
+    print(f"Cuda is set to {args.cuda}")
+    if args.cuda: model.cuda()
 
-    train_samples = len(ds_train)
-    valid_samples = len(ds_valid)
-    train_batches = math.floor(train_samples/args.batch_size)
-    valid_batches = math.ceil(valid_samples/args.batch_size)
+
+
 
     loss_fn = nn.CrossEntropyLoss(reduction="mean")
-    if args.train_on_wrongly: loss_fn = custom.CrossEntropyLossOnBadExamples()
+    if args.train_on_wrongly: 
+        loss_fn = custom.CrossEntropyLossOnBadExamples()
+    if args.smsoftmax: 
+        loss_fn = custom.SMSoftmaxLoss(args.smsoftmax)
+        task.add_tags("SMSOFTMAX")
     for epoch in range(args.epochs):
         entropy, accuracy = train_one_epoch(model, optimizer, train_loader, loss_fn, cuda=args.cuda)
         task.logger.report_scalar("entropy", "train", entropy, iteration=epoch)
@@ -127,7 +131,7 @@ if __name__ == "__main__":
         task.logger.report_scalar("accuracy", "valid", accuracy, iteration=epoch)
     state = model.state_dict()
     date_s = datetime.datetime.today().strftime("%d-%m-%y_%H-%M")
-    out_dir = f"D:\\Modele\\klasyfikacja\\{args.net}\\date_s"
+    out_dir = f"D:\\Modele\\klasyfikacja\\{args.net}\\{date_s}"
     try:
         os.makedirs(out_dir)
     except Exception:
