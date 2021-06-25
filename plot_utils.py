@@ -1,5 +1,6 @@
 import torch
 import matplotlib.pyplot as plt
+import numpy as np
 
 def create_classification_figure(in_tensor: torch.Tensor, predictions_prob: torch.Tensor):
     fig = plt.figure()
