@@ -78,7 +78,7 @@ def un_normalize(image: torch.Tensor):
 
 
 def get_transform(target_size=224):
-    return Compose([Resize(target_size), ToTensor(), Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+    return Compose([Resize((target_size, target_size)), ToTensor(), Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
 
 
 def copy_batch_to_cuda(batch: Tuple[torch.Tensor, torch.Tensor]):
